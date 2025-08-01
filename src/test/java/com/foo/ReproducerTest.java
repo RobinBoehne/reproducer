@@ -30,6 +30,12 @@ public class ReproducerTest {
         datastore.save(book.author);
         datastore.save(book);
 
+        Book book1 = datastore.find(Book.class).iterator().toList().get(0);
+        Author author1 = datastore.find(Author.class).iterator().toList().get(0);
+
+        System.out.println(book1.getAuthor().getId());
+        System.out.println(author1.getId());
+
         datastore.aggregate(Book.class)
                 .lookup(Lookup.lookup(Author.class)
                         .localField("author")
