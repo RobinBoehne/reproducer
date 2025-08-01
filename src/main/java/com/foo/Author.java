@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import org.bson.types.ObjectId;
 
-import dev.morphia.annotations.CappedAt;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 
@@ -14,8 +13,7 @@ public class Author {
     public ObjectId id;
     public String name;
 
-    public Author() {
-    }
+    public Author() {}
 
     public Author(String name) {
         this.name = name;
