@@ -5,6 +5,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import dev.morphia.Datastore;
 import dev.morphia.Morphia;
+import dev.morphia.aggregation.stages.Lookup;
+import dev.morphia.aggregation.stages.Unwind;
 import org.bson.UuidRepresentation;
 import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.MongoDBContainer;
@@ -12,6 +14,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static com.mongodb.MongoClientSettings.builder;
+import static dev.morphia.query.filters.Filters.eq;
 
 public class ReproducerTest {
 
@@ -22,6 +25,20 @@ public class ReproducerTest {
 
     @Test
     public void reproduce() {
+        Book book = new Book("The Eye of the World");
+        book.author = new Author("Robert Jordan");
+        datastore.save(book.author);
+        datastore.save(book);
+
+        datastore.aggregate(Book.class)
+                .lookup(Lookup.lookup(Author.class)
+                        .localField("author")
+                        .foreignField("_id")
+                        .as("author"))
+                .unwind(Unwind.unwind("author"))
+                .match(eq("author.name", "Robert Jordan"))
+                .execute(Book.class)
+                .toList();
     }
 
     @NotNull
