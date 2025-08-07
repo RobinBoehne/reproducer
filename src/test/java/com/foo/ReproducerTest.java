@@ -47,6 +47,12 @@ public class ReproducerTest {
                 .toList();
     }
 
+    @Test
+    public void capTest() {
+        datastore.save(new CappedEntity());
+        datastore.ensureCaps();
+    }
+
     @NotNull
     public String databaseName() {
         return "morphia_repro";
