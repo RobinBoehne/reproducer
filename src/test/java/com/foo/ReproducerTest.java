@@ -7,11 +7,14 @@ import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 import dev.morphia.aggregation.stages.Lookup;
 import dev.morphia.aggregation.stages.Unwind;
+import org.bson.Document;
 import org.bson.UuidRepresentation;
 import org.jetbrains.annotations.NotNull;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 import static com.mongodb.MongoClientSettings.builder;
 import static dev.morphia.query.filters.Filters.eq;
@@ -36,6 +39,20 @@ public class ReproducerTest {
         System.out.println(book1.getAuthor().getId());
         System.out.println(author1.getId());
 
+
+        //.execute(Document.class) works
+        List<Document> docs = datastore.aggregate(Book.class)
+                .lookup(Lookup.lookup(Author.class)
+                        .localField("author")
+                        .foreignField("_id")
+                        .as("author"))
+                .unwind(Unwind.unwind("author"))
+                .match(eq("author.name", "Robert Jordan"))
+                .execute(Document.class)
+                .toList();
+        System.out.println(docs.getFirst().toJson());
+
+        //.execute(Book.class) does not work
         datastore.aggregate(Book.class)
                 .lookup(Lookup.lookup(Author.class)
                         .localField("author")
@@ -46,6 +63,7 @@ public class ReproducerTest {
                 .execute(Book.class)
                 .toList();
     }
+
 
     @Test
     public void capTest() {
